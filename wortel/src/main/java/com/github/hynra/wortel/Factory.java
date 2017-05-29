@@ -88,5 +88,11 @@ public class Factory {
     }
 
 
+    public Publisher createProducer(BrokerCallback callback){
+        Publisher publisher = Publisher.createInstance(this, callback);
+        return publisher;
+    }
+
+
 
 }
