@@ -4,7 +4,7 @@ package com.github.hynra.wortel;
  * Created by hynra on 5/29/17.
  */
 
-public class ConnectionFactory {
+public class Factory {
 
     private String excahnge;
     private String routingKey;
@@ -14,7 +14,7 @@ public class ConnectionFactory {
     private String password;
     private int port;
 
-    public ConnectionFactory(String hostName, String virtualHostName, String username, String password, String excahnge, String routingKey, int port) {
+    public Factory(String hostName, String virtualHostName, String username, String password, String excahnge, String routingKey, int port) {
         this.excahnge = excahnge;
         this.routingKey = routingKey;
         this.hostName = hostName;
@@ -79,6 +79,14 @@ public class ConnectionFactory {
     public void setPort(int port) {
         this.port = port;
     }
+
+
+
+    public Consumer createConsumer(BrokerCallback callback){
+        Consumer consumer = Consumer.createInstance(this, callback);
+        return consumer;
+    }
+
 
 
 }
