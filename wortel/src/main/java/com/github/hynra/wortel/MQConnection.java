@@ -1,6 +1,9 @@
 package com.github.hynra.wortel;
 
+import android.os.AsyncTask;
+
 import com.github.hynra.wortel.models.FactoryModel;
+import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.ShutdownListener;
@@ -24,10 +27,7 @@ public class MQConnection  {
     private int requestHeartBeat = 30;
     private BrokerCallback mCallback;
     private Connection mConnection;
-
-
-
-
+    private Channel mChannel;
 
 
     /** Constructor **/
@@ -62,21 +62,47 @@ public class MQConnection  {
         this.mCallback = factoryModel.getmCallback();
     }
 
-    public void  createConnection() throws IOException, TimeoutException {
-        ConnectionFactory connectionFactory = new ConnectionFactory();
-        connectionFactory.setUsername(username);
-        connectionFactory.setPassword(password);
-        connectionFactory.setVirtualHost(virtualHostName);
-        connectionFactory.setHost(hostName);
-        connectionFactory.setPort(port);
-        connectionFactory.setConnectionTimeout(this.requestTimeOut);
-        connectionFactory.setRequestedHeartbeat(this.requestHeartBeat);
-        mConnection = connectionFactory.newConnection();
-        mConnection.addShutdownListener(cause -> {
-            String errorMessage = cause.getMessage() == null ? "connection was shutdown" : "consumer " + cause.getMessage();
-            mCallback.onConnectionClosed(errorMessage);
-        });
+    public void  initConnection() throws IOException, TimeoutException {
+        new AsyncTask<Void,Void,Boolean>(){
+            @Override
+            protected Boolean doInBackground(Void... voids) {
+                try{
+
+                    ConnectionFactory connectionFactory = new ConnectionFactory();
+                    connectionFactory.setUsername(username);
+                    connectionFactory.setPassword(password);
+                    connectionFactory.setVirtualHost(virtualHostName);
+                    connectionFactory.setHost(hostName);
+                    connectionFactory.setPort(port);
+                    connectionFactory.setConnectionTimeout(requestTimeOut);
+                    connectionFactory.setRequestedHeartbeat(requestHeartBeat);
+                    mConnection = connectionFactory.newConnection();
+                    mChannel = mConnection.createChannel();
+                    mConnection.addShutdownListener(cause -> {
+                        String errorMessage = cause.getMessage() == null ? "connection was shutdown" : "consumer " + cause.getMessage();
+                        mCallback.onConnectionClosed(errorMessage);
+                    });
+                    return true;
+                } catch (Exception e){
+                    e.printStackTrace();
+                    return false;
+                }
+            }
+
+            @Override
+            protected void onPostExecute(Boolean aBoolean) {
+                super.onPostExecute(aBoolean);
+                if(!aBoolean){
+                    String errorMessage = "Connection to MQ Failure!";
+                    mCallback.onConnectionFailure(errorMessage);
+                }else {
+                    mCallback.onConnectionSuccess(mChannel);
+                }
+            }
+        }.execute();
     }
+
+
 
 
 
