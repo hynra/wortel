@@ -14,8 +14,6 @@ import java.util.concurrent.TimeoutException;
 
 public class MQConnection  {
 
-    private String excahnge;
-    private String routingKey;
     private String hostName;
     private String virtualHostName;
     private String username;
@@ -41,8 +39,6 @@ public class MQConnection  {
             String password, String excahnge, String routingKey, int port,
             int requestTimeOut, int requestHeartBeat, BrokerCallback mCallback) {
 
-        this.excahnge = excahnge;
-        this.routingKey = routingKey;
         this.hostName = hostName;
         this.virtualHostName = virtualHostName;
         this.username = username;
@@ -86,22 +82,6 @@ public class MQConnection  {
 
     public void setHostName(String hostName) {
         this.hostName = hostName;
-    }
-
-    public String getExcahnge() {
-        return excahnge;
-    }
-
-    public void setExcahnge(String excahnge) {
-        this.excahnge = excahnge;
-    }
-
-    public String getRoutingKey() {
-        return routingKey;
-    }
-
-    public void setRoutingKey(String routingKey) {
-        this.routingKey = routingKey;
     }
 
     public String getVirtualHostName() {
