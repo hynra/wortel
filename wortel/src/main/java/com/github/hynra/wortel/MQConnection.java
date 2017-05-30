@@ -1,5 +1,6 @@
 package com.github.hynra.wortel;
 
+import com.github.hynra.wortel.models.FactoryModel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.ShutdownListener;
@@ -21,18 +22,15 @@ public class MQConnection  {
     private int port;
     private int requestTimeOut = 30 * 1000;
     private int requestHeartBeat = 30;
-
-
-    public Connection getmConnection() {
-        return mConnection;
-    }
-
-    public void setmConnection(Connection mConnection) {
-        this.mConnection = mConnection;
-    }
-
     private BrokerCallback mCallback;
     private Connection mConnection;
+
+
+
+
+
+
+    /** Constructor **/
 
     public MQConnection(
             String hostName, String virtualHostName, String username,
@@ -53,6 +51,16 @@ public class MQConnection  {
 
     }
 
+    public MQConnection(FactoryModel factoryModel){
+        this.hostName = factoryModel.getHostName();
+        this.virtualHostName = factoryModel.getVirtualHostName();
+        this.username = factoryModel.getUsername();
+        this.password = factoryModel.getPassword();
+        this.port = factoryModel.getPort();
+        this.requestTimeOut = factoryModel.getRequestTimeOut();
+        this.requestHeartBeat = factoryModel.getRequestHeartBeat();
+        this.mCallback = factoryModel.getmCallback();
+    }
 
     public void  createConnection() throws IOException, TimeoutException {
         ConnectionFactory connectionFactory = new ConnectionFactory();
