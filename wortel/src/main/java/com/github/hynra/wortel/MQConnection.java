@@ -33,8 +33,7 @@ public class MQConnection  {
     /** Constructor **/
 
     public MQConnection(
-            String hostName, String virtualHostName, String username,
-            String password, String excahnge, String routingKey, int port,
+            String hostName, String virtualHostName, String username, String password, int port,
             int requestTimeOut, int requestHeartBeat, BrokerCallback mCallback) {
 
         this.hostName = hostName;
@@ -79,12 +78,13 @@ public class MQConnection  {
                     mConnection = connectionFactory.newConnection();
                     mChannel = mConnection.createChannel();
                     mConnection.addShutdownListener(cause -> {
-                        String errorMessage = cause.getMessage() == null ? "connection was shutdown" : "consumer " + cause.getMessage();
+                        String errorMessage = cause.getMessage() == null ? "connection was shutdown" : "shutdown : " + cause.getMessage();
                         mCallback.onConnectionClosed(errorMessage);
                     });
                     return true;
                 } catch (Exception e){
                     e.printStackTrace();
+                    mCallback.onConnectionFailure(e.getMessage());
                     return false;
                 }
             }
@@ -92,16 +92,12 @@ public class MQConnection  {
             @Override
             protected void onPostExecute(Boolean aBoolean) {
                 super.onPostExecute(aBoolean);
-                if(!aBoolean){
-                    String errorMessage = "Connection to MQ Failure!";
-                    mCallback.onConnectionFailure(errorMessage);
-                }else {
+                if(aBoolean){
                     mCallback.onConnectionSuccess(mChannel);
                 }
             }
         }.execute();
     }
-
 
 
 
@@ -171,7 +167,7 @@ public class MQConnection  {
         return mCallback;
     }
 
-    public void setmCallback(BrokerCallback mCallback) {
+    public void setBrokerCallback(BrokerCallback mCallback) {
         this.mCallback = mCallback;
     }
 

@@ -12,7 +12,5 @@ public interface BrokerCallback {
 
     void onConnectionFailure(String message);
 
-    void onDisconnected();
-
     void onConnectionClosed(String message);
 }
