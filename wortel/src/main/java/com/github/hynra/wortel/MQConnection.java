@@ -76,7 +76,7 @@ public class MQConnection  {
                     connectionFactory.setConnectionTimeout(requestTimeOut);
                     connectionFactory.setRequestedHeartbeat(requestHeartBeat);
                     mConnection = connectionFactory.newConnection();
-                    mChannel = mConnection.createChannel();
+                 //   mChannel = mConnection.createChannel();
                     mConnection.addShutdownListener(cause -> {
                         String errorMessage = cause.getMessage() == null ? "connection was shutdown" : "shutdown : " + cause.getMessage();
                         mCallback.onConnectionClosed(errorMessage);
@@ -163,7 +163,7 @@ public class MQConnection  {
     }
 
 
-    public BrokerCallback getmCallback() {
+    public BrokerCallback getBrokerCallback() {
         return mCallback;
     }
 

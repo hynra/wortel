@@ -27,6 +27,7 @@ public class Consumer extends Connector{
     private Handler mCallbackHandler = new Handler();
     private MQConsumerListener mqConsumerListener;
     private boolean queuing = true;
+
     public interface MQConsumerListener{
         public void onMessageReceived(QueueingConsumer.Delivery delivery);
     }
