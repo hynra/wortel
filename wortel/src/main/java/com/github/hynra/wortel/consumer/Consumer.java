@@ -54,7 +54,7 @@ public class Consumer {
         }
     }
 
-    public void consume(String queueName){
+    public void consume(String queueName, Map params){
         isRunning = true;
         queuing = true;
         Log.d(TAG, "subscribe");
@@ -64,7 +64,7 @@ public class Consumer {
                 try {
                     Log.d(TAG, "subscribe -> run -> subscribeRunning");
                     initchanenel();
-                    String mQueueName = declareQueue(queueName);
+                    String mQueueName = declareQueue(queueName, params);
                 //    mChannel.queueBind(mQueueName, mExchange, mRoutingKey);
                     mQueue = new QueueingConsumer(mChannel);
                     mChannel.basicConsume(mQueueName, mQueue);
@@ -89,15 +89,56 @@ public class Consumer {
         subscribeThread.start();
     }
 
+
+    public void consume(String queueName, Map params, String exchangeName, String routingKey){
+        isRunning = true;
+        queuing = true;
+        Log.d(TAG, "subscribe");
+        subscribeThread = new Thread(() -> {
+            Log.d(TAG, "subscribe -> run");
+            while(isRunning) {
+                try {
+                    Log.d(TAG, "subscribe -> run -> subscribeRunning");
+                    initchanenel();
+                    String mQueueName = declareQueue(queueName, params);
+                    mChannel.queueBind(mQueueName, exchangeName, routingKey);
+                    mQueue = new QueueingConsumer(mChannel);
+                    mChannel.basicConsume(mQueueName, mQueue);
+                    while(queuing){
+                        Log.d(TAG, "subscribe -> run -> subscribeRunning -> queuing");
+                        final QueueingConsumer.Delivery delivery;
+                        delivery = mQueue.nextDelivery();
+                        mChannel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
+                        mCallbackHandler.post(() -> mqConsumerListener.onMessageReceived(delivery));
+                    }
+                } catch (InterruptedException | ConsumerCancelledException
+                        | ShutdownSignalException | IOException e) {
+                    sendBackErrorMessage(e);
+                    try {
+                        Thread.sleep(5000);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                }
+            }
+        });
+        subscribeThread.start();
+    }
+
+
+
+
+
+
     private void sendBackErrorMessage(Exception e) {
         final String errorMessage = e.getMessage() == null ? e.toString() : e.getMessage();
         mCallbackHandler.post(() -> mCallback.onConnectionFailure(errorMessage));
     }
 
-    private String declareQueue(String queueName) throws IOException {
-        Map<String, Object> params = new HashMap<String, Object>();
-        params.put("x-expires", 2 * 60 * 60 * 1000);
-        queueName = mChannel.queueDeclare(queueName, false, true, false, null).getQueue();
+    private String declareQueue(String queueName, Map params) throws IOException {
+        /* Map<String, Object> params = new HashMap<String, Object>();
+        params.put("x-expires", 2 * 60 * 60 * 1000); */
+        queueName = mChannel.queueDeclare(queueName, false, true, false, params).getQueue();
         Log.d(TAG, "Queue :" + "queue:name:" + queueName + " declared");
 
         return  queueName;
