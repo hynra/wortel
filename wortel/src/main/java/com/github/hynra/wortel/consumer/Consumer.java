@@ -65,7 +65,6 @@ public class Consumer {
                     Log.d(TAG, "subscribe -> run -> subscribeRunning");
                     initchanenel();
                     String mQueueName = declareQueue(queueName, params);
-                //    mChannel.queueBind(mQueueName, mExchange, mRoutingKey);
                     mQueue = new QueueingConsumer(mChannel);
                     mChannel.basicConsume(mQueueName, mQueue);
                     while(queuing){
