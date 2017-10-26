@@ -70,13 +70,14 @@ public class Publisher extends Connector{
         }
     }
 
-    public void publish(final String message, final BasicProperties properties){
+    public void publish(final String message, final BasicProperties properties, boolean isDeclared){
         publishThread = new Thread(() -> {
             while(isRunning) {
                 try {
                     initConnection();
                     initchanenel();
-                    declareQueue();
+                    if(isDeclared)
+                        declareQueue();
                     mChannel.confirmSelect();
                     //    mChannel.queueBind(mQueueName, mExchange, mRoutingKey);
                     byte [] messageBytes = message.getBytes();
